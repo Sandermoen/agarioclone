@@ -1,0 +1,25 @@
+{
+  "name": "agarioclone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "servers.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sandermoen/agarioclone.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sandermoen/agarioclone/issues"
+  },
+  "homepage": "https://github.com/Sandermoen/agarioclone#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "socket.io": "^2.3.0"
+  }
+}
