@@ -35,7 +35,6 @@ setInterval(() => {
 
 io.sockets.on('connect', socket => {
   let player = {};
-  player.tickSent = false;
   // a player has connected
   socket.on('init', data => {
     // add the player to the game namespace
@@ -58,13 +57,13 @@ io.sockets.on('connect', socket => {
     }, 33); // there are 30 33s in 1000 milliseconds, or 1/30th of a second, or 1 of 30 frames per second
 
     socket.emit('initReturn', {
-      orbs
+      orbs,
+      playerId: player.playerData.uid
     });
     players.push(playerData);
   });
   // the client sent over a tick, that means we know what direction to move the socket
   socket.on('tick', data => {
-    player.tickSent = true;
     if (data.xVector && data.yVector) {
       speed = player.playerConfig.speed;
       // update the player config object with the new direction in data
@@ -103,6 +102,8 @@ io.sockets.on('connect', socket => {
           newOrb: orbs[data]
         };
         // console.log(orbData);
+        // every socket needs to know the leaderboard has changed
+        io.sockets.emit('updateLeaderBoard', getLeaderBoard());
         io.sockets.emit('orbSwitch', orbData);
       })
       .catch(() => {
@@ -118,13 +119,41 @@ io.sockets.on('connect', socket => {
     );
     playerDeath
       .then(data => {
-        console.log('player collision!');
+        // every socket needs to know the leaderboard has changed
+        io.sockets.emit('updateLeaderBoard', getLeaderBoard());
+        // a player was absorbed let everyone know
+        io.sockets.emit('playerDeath', data);
       })
       .catch(() => {
         // No player collision
       });
   });
+  socket.on('disconnect', data => {
+    // find out who just left... which player in the players array
+    if (player.playerData) {
+      players.forEach((curPlayer, i) => {
+        if (curPlayer.uid == player.playerData.uid) {
+          players.splice(i, 1);
+          io.sockets.emit('updateLeaderBoard', getLeaderBoard());
+        }
+      });
+    }
+  });
 });
+
+function getLeaderBoard() {
+  // sort players in desc order
+  players.sort((a, b) => {
+    return b.score - a.score;
+  });
+  let leaderBoard = players.map(curPlayer => {
+    return {
+      name: curPlayer.name,
+      score: curPlayer.score
+    };
+  });
+  return leaderBoard;
+}
 
 // Run at the beginning of a new game
 function initGame() {

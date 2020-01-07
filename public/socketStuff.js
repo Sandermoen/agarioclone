@@ -14,6 +14,7 @@ function init() {
 socket.on('initReturn', data => {
   // console.log(data.orbs);
   orbs = data.orbs;
+  player.playerId = data.playerId;
   setInterval(() => {
     socket.emit('tick', {
       xVector: player.xVector,
@@ -35,4 +36,28 @@ socket.on('orbSwitch', data => {
 socket.on('tickTock', data => {
   player.locX = data.playerX;
   player.locY = data.playerY;
+});
+
+socket.on('updateLeaderBoard', data => {
+  document.querySelector('.leader-board').innerHTML = '';
+  data.forEach(curPlayer => {
+    document.querySelector(
+      '.leader-board'
+    ).innerHTML += `<li class="leaderboard-player">${curPlayer.name} - ${curPlayer.score}</li>`;
+  });
+});
+
+socket.on('playerDeath', data => {
+  console.log(data);
+  if (player.playerId === data.died.uid) {
+    player.dead = true;
+    $('#killedModal').modal('show');
+    document.querySelector('.killed-by-name').innerText = data.killedBy.name;
+  }
+  document.querySelector(
+    '#game-message'
+  ).innerHTML = `${data.died.name} absorbed by ${data.killedBy.name}`;
+  $('#game-message').css({ 'background-color': '#00e6e6', opacity: 1 });
+  $('#game-message').show();
+  $('#game-message').fadeOut(5000);
 });

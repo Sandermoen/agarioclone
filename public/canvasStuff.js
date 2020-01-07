@@ -10,10 +10,12 @@ function draw() {
 
   // console.log(player.locX, player.locY);
   // clamp the camera to the player
-  const camX = -player.locX + canvas.width / 2;
-  const camY = -player.locY + canvas.height / 2;
-  // translate allows us to move the canvas around
-  context.translate(camX, camY);
+  if (!player.dead) {
+    const camX = -player.locX + canvas.width / 2;
+    const camY = -player.locY + canvas.height / 2;
+    // translate allows us to move the canvas around
+    context.translate(camX, camY);
+  }
 
   // draw all the players
   players.forEach(p => {
